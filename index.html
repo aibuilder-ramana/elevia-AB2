@@ -1041,6 +1041,20 @@ const I = {
       r: ".6",
       fill: "currentColor"
     }))
+  })),
+  thumbUp: p => /*#__PURE__*/React.createElement(Icon, _extends({}, p, {
+    d: /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+      d: "M7 10v10H4a2 2 0 0 1-2-2v-6a2 2 0 0 1 2-2z"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M7 10l5-7a2 2 0 0 1 3.5 1.6L15 8h4.5a2 2 0 0 1 2 2.3l-1.2 7A3 3 0 0 1 17.4 20H7"
+    }))
+  })),
+  thumbDown: p => /*#__PURE__*/React.createElement(Icon, _extends({}, p, {
+    d: /*#__PURE__*/React.createElement("g", null, /*#__PURE__*/React.createElement("path", {
+      d: "M7 14V4H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2z"
+    }), /*#__PURE__*/React.createElement("path", {
+      d: "M7 14l5 7a2 2 0 0 0 3.5-1.6L15 16h4.5a2 2 0 0 0 2-2.3l-1.2-7A3 3 0 0 0 17.4 4H7"
+    }))
   }))
 };
 window.I = I;
@@ -2683,7 +2697,8 @@ const InsuranceScanZone = ({
 
 const EnquiryWizard = ({
   onSubmit,
-  onExit
+  onExit,
+  onScreenChange
 }) => {
   const totalSteps = 6;
   const [step, setStep] = React.useState(1);
@@ -2705,6 +2720,20 @@ const EnquiryWizard = ({
   // Insurance scan state
   const [insPreview, setInsPreview] = React.useState(null);
   const [insScanning, setInsScanning] = React.useState(false);
+  React.useEffect(() => {
+    const labels = {
+      1: "Patient enquiry - Basics",
+      2: "Patient enquiry - Gender",
+      3: "Patient enquiry - Location",
+      4: "Patient enquiry - Insurance",
+      5: "Patient enquiry - Care needs",
+      6: "Patient enquiry - Final note"
+    };
+    onScreenChange?.({
+      id: `patient:enquiry-step-${step}`,
+      label: labels[step] || `Patient enquiry - Step ${step}`
+    });
+  }, [step]);
   const set = (k, v) => setData(d => ({
     ...d,
     [k]: v
@@ -3619,7 +3648,8 @@ const QuestionBlock = ({
 const DetailedIntake = ({
   enquiry,
   onSubmit,
-  onExit
+  onExit,
+  onScreenChange
 }) => {
   // Build module list dynamically from issues
   const issueModules = (enquiry?.issues || ["anxiety"]).map(id => ISSUE_MODULES[id]).filter(Boolean);
@@ -3635,6 +3665,13 @@ const DetailedIntake = ({
     [k]: v
   }));
   const onSchedulingStep = step === totalSteps;
+  React.useEffect(() => {
+    const mod = modules[step - 1];
+    onScreenChange?.({
+      id: onSchedulingStep ? "patient:detailed-intake-scheduling" : `patient:detailed-intake-step-${step}`,
+      label: onSchedulingStep ? "Patient detailed intake - Scheduling" : `Patient detailed intake - ${mod?.title || `Section ${step}`}`
+    });
+  }, [step, onSchedulingStep]);
   return /*#__PURE__*/React.createElement(PatientShell, {
     step: step,
     totalSteps: totalSteps,
@@ -6752,6 +6789,252 @@ const applyTokens = (theme, accent) => {
   r.style.setProperty("--sage-tint", a.tint);
 };
 
+const FEEDBACK_API_URL = window.ELEVIA_FEEDBACK_API_URL || "https://elevia-feedback-production.up.railway.app";
+const FEEDBACK_LOCAL_KEY = "elevia-ab2-feedback-log";
+const FEEDBACK_CLIENT_KEY = "elevia-ab2-feedback-client";
+const feedbackScreenFallback = {
+  id: "unknown",
+  label: "Unknown screen"
+};
+const getFeedbackClientId = () => {
+  try {
+    const existing = localStorage.getItem(FEEDBACK_CLIENT_KEY);
+    if (existing) return existing;
+    const id = crypto.randomUUID ? crypto.randomUUID() : `client-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(FEEDBACK_CLIENT_KEY, id);
+    return id;
+  } catch (e) {
+    return `client-${Date.now()}`;
+  }
+};
+const keepFeedbackCopy = entry => {
+  try {
+    const current = JSON.parse(localStorage.getItem(FEEDBACK_LOCAL_KEY) || "[]");
+    current.push(entry);
+    localStorage.setItem(FEEDBACK_LOCAL_KEY, JSON.stringify(current.slice(-100)));
+  } catch (e) {}
+};
+const FeedbackWidget = ({
+  screen = feedbackScreenFallback
+}) => {
+  const [open, setOpen] = React.useState(false);
+  const [note, setNote] = React.useState("");
+  const [status, setStatus] = React.useState("idle");
+  const [message, setMessage] = React.useState("");
+  const [lastSentiment, setLastSentiment] = React.useState(null);
+  React.useEffect(() => {
+    setOpen(false);
+    setNote("");
+    setStatus("idle");
+    setMessage("");
+    setLastSentiment(null);
+  }, [screen.id]);
+  const submit = async sentiment => {
+    const trimmed = note.trim();
+    if (sentiment === "note" && !trimmed) {
+      setOpen(true);
+      setMessage("Add a note first.");
+      return;
+    }
+    const entry = {
+      project: "elevia-AB2",
+      screenId: screen.id,
+      screenLabel: screen.label,
+      sentiment,
+      note: trimmed,
+      url: window.location.href,
+      clientId: getFeedbackClientId(),
+      viewport: `${window.innerWidth}x${window.innerHeight}`,
+      createdAt: new Date().toISOString()
+    };
+    keepFeedbackCopy(entry);
+    setStatus("saving");
+    setMessage("");
+    setLastSentiment(sentiment);
+    try {
+      const endpoint = `${FEEDBACK_API_URL.replace(/\/$/, "")}/api/feedback`;
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(entry)
+      });
+      if (!res.ok) throw new Error(`Feedback API returned ${res.status}`);
+      setStatus("saved");
+      setMessage("Saved");
+      if (sentiment === "note") {
+        setNote("");
+        setOpen(false);
+      }
+    } catch (e) {
+      setStatus("failed");
+      setMessage("Saved locally");
+      console.warn("Feedback was saved locally but not sent.", e);
+    }
+  };
+  const buttonStyle = active => ({
+    width: 34,
+    height: 34,
+    borderRadius: 8,
+    border: `1px solid ${active ? "var(--ink)" : "var(--border)"}`,
+    background: active ? "var(--ink)" : "var(--paper)",
+    color: active ? "var(--paper)" : "var(--muted)",
+    display: "inline-flex",
+    alignItems: "center",
+    justifyContent: "center",
+    cursor: status === "saving" ? "wait" : "pointer",
+    transition: "all .12s"
+  });
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      position: "fixed",
+      top: 44,
+      right: 18,
+      zIndex: 140,
+      width: open ? 320 : "auto",
+      maxWidth: "calc(100vw - 24px)",
+      fontFamily: "var(--font-sans)",
+      color: "var(--ink)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      background: "rgba(255,255,255,0.88)",
+      border: "1px solid var(--border)",
+      borderRadius: 10,
+      boxShadow: "0 16px 40px rgba(0,0,0,0.1)",
+      backdropFilter: "blur(18px)",
+      padding: open ? 12 : 6
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 6
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    title: `Thumbs up for ${screen.label}`,
+    "aria-label": `Thumbs up for ${screen.label}`,
+    disabled: status === "saving",
+    onClick: () => submit("up"),
+    style: buttonStyle(lastSentiment === "up")
+  }, /*#__PURE__*/React.createElement(I.thumbUp, {
+    size: 17
+  })), /*#__PURE__*/React.createElement("button", {
+    title: `Thumbs down for ${screen.label}`,
+    "aria-label": `Thumbs down for ${screen.label}`,
+    disabled: status === "saving",
+    onClick: () => submit("down"),
+    style: buttonStyle(lastSentiment === "down")
+  }, /*#__PURE__*/React.createElement(I.thumbDown, {
+    size: 17
+  })), /*#__PURE__*/React.createElement("button", {
+    title: `Write feedback for ${screen.label}`,
+    "aria-label": `Write feedback for ${screen.label}`,
+    onClick: () => setOpen(v => !v),
+    style: buttonStyle(open)
+  }, /*#__PURE__*/React.createElement(I.info, {
+    size: 17
+  })), /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: 1,
+      height: 20,
+      background: "var(--border)",
+      margin: "0 2px"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    title: screen.label,
+    style: {
+      maxWidth: open ? 150 : 118,
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      fontSize: 11.5,
+      color: "var(--muted)",
+      fontWeight: 500
+    }
+  }, screen.label)), open && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 10,
+      display: "grid",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("textarea", {
+    value: note,
+    onChange: e => setNote(e.target.value),
+    rows: 4,
+    maxLength: 2000,
+    placeholder: "Feedback for this screen...",
+    style: {
+      width: "100%",
+      resize: "vertical",
+      minHeight: 82,
+      border: "1px solid var(--border)",
+      borderRadius: 8,
+      background: "var(--paper)",
+      color: "var(--ink)",
+      padding: 10,
+      fontFamily: "var(--font-sans)",
+      fontSize: 13,
+      lineHeight: 1.45,
+      outline: "none"
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => submit("note"),
+    disabled: status === "saving" || !note.trim(),
+    style: {
+      height: 32,
+      padding: "0 12px",
+      borderRadius: 8,
+      border: "none",
+      background: note.trim() ? "var(--ink)" : "var(--border)",
+      color: note.trim() ? "var(--paper)" : "var(--muted)",
+      cursor: status === "saving" ? "wait" : note.trim() ? "pointer" : "default",
+      fontFamily: "var(--font-sans)",
+      fontSize: 12.5,
+      fontWeight: 600
+    }
+  }, status === "saving" ? "Saving..." : "Save"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => {
+      setOpen(false);
+      setNote("");
+      setMessage("");
+    },
+    style: {
+      height: 32,
+      padding: "0 10px",
+      borderRadius: 8,
+      border: "1px solid var(--border)",
+      background: "transparent",
+      color: "var(--muted)",
+      cursor: "pointer",
+      fontFamily: "var(--font-sans)",
+      fontSize: 12.5
+    }
+  }, "Cancel"), /*#__PURE__*/React.createElement("span", {
+    style: {
+      marginLeft: "auto",
+      color: status === "failed" ? "#a44a3f" : "var(--muted)",
+      fontSize: 11.5,
+      fontWeight: 500
+    }
+  }, message))), !open && message && /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 6,
+      color: status === "failed" ? "#a44a3f" : "var(--sage-deep)",
+      fontSize: 11.5,
+      textAlign: "center",
+      fontWeight: 600
+    }
+  }, message)));
+};
+
 /* ============================================================ */
 /*  DEMO PERSONA BAR  (clearly labeled — not production UI)      */
 /* ============================================================ */
@@ -6818,7 +7101,9 @@ const PersonaBar = ({
 /*  PATIENT FLOW CONTROLLER                                      */
 /* ============================================================ */
 
-const PatientApp = () => {
+const PatientApp = ({
+  onScreenChange
+}) => {
   const {
     addEnquiry,
     updateEnquiry,
@@ -6828,6 +7113,18 @@ const PatientApp = () => {
   const [myEnquiryId, setMyEnquiryId] = React.useState(null);
   const [booking, setBooking] = React.useState(null);
   const myEnquiry = enquiries.find(e => e.id === myEnquiryId);
+  React.useEffect(() => {
+    if (screen === "enquiry" || screen === "detailed") return;
+    const labels = {
+      landing: "Patient landing",
+      status: "Patient status",
+      booked: "Patient booking confirmation"
+    };
+    onScreenChange?.({
+      id: `patient:${screen}`,
+      label: labels[screen] || `Patient ${screen}`
+    });
+  }, [screen]);
   if (screen === "landing") {
     return /*#__PURE__*/React.createElement(PatientLanding, {
       onStart: () => setScreen("enquiry")
@@ -6836,6 +7133,7 @@ const PatientApp = () => {
   if (screen === "enquiry") {
     return /*#__PURE__*/React.createElement(EnquiryWizard, {
       onExit: () => setScreen("landing"),
+      onScreenChange: onScreenChange,
       onSubmit: data => {
         const rec = addEnquiry(data);
         setMyEnquiryId(rec.id);
@@ -6861,6 +7159,7 @@ const PatientApp = () => {
         email: "you@email.com"
       },
       onExit: () => setScreen("status"),
+      onScreenChange: onScreenChange,
       onSubmit: b => {
         if (myEnquiry) updateEnquiry(myEnquiry.id, {
           status: "scheduled",
@@ -6886,7 +7185,9 @@ const PatientApp = () => {
 };
 
 /* For demo: also let user jump straight into the detailed intake from a "sample link" */
-const PatientAppWithJumps = () => {
+const PatientAppWithJumps = ({
+  onScreenChange
+}) => {
   const {
     enquiries
   } = useStore();
@@ -6894,7 +7195,9 @@ const PatientAppWithJumps = () => {
 
   // sample link buttons in the bottom-right
   const sample = enquiries.find(e => e.id === "E-1042");
-  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(PatientApp, null), /*#__PURE__*/React.createElement("div", {
+  return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(PatientApp, {
+    onScreenChange: onScreenChange
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       bottom: 18,
@@ -6932,7 +7235,9 @@ const PatientAppWithJumps = () => {
 /*  ADMIN FLOW CONTROLLER                                        */
 /* ============================================================ */
 
-const AdminApp = () => {
+const AdminApp = ({
+  onScreenChange
+}) => {
   const [page, setPage] = React.useState("dashboard");
   const [panelOpen, setPanelOpen] = React.useState(false);
   const {
@@ -6950,6 +7255,20 @@ const AdminApp = () => {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
+  React.useEffect(() => {
+    const labels = {
+      dashboard: "Admin enquiries",
+      assistant: "Admin assistant",
+      calendar: "Admin calendar",
+      patients: "Admin patients",
+      forms: "Admin forms",
+      team: "Admin team"
+    };
+    onScreenChange?.({
+      id: panelOpen ? "admin:assistant-panel" : `admin:${page}`,
+      label: panelOpen ? "Admin assistant panel" : labels[page] || `Admin ${page}`
+    });
+  }, [page, panelOpen]);
   const jumpToPatient = id => {
     setPanelOpen(false);
     setPage("dashboard");
@@ -7033,10 +7352,23 @@ const ComingSoon = ({
 
 const App = () => {
   const [persona, setPersona] = React.useState("patient");
+  const [activeScreen, setActiveScreen] = React.useState({
+    id: "patient:landing",
+    label: "Patient landing"
+  });
   const [tweaks, setTweak] = useTweaks(DEFAULT_TWEAKS);
   React.useEffect(() => {
     applyTokens(tweaks.theme, tweaks.accent);
   }, [tweaks.theme, tweaks.accent]);
+  React.useEffect(() => {
+    setActiveScreen(persona === "patient" ? {
+      id: "patient:landing",
+      label: "Patient landing"
+    } : {
+      id: "admin:dashboard",
+      label: "Admin enquiries"
+    });
+  }, [persona]);
   return /*#__PURE__*/React.createElement(StoreProvider, null, /*#__PURE__*/React.createElement("div", {
     "data-screen-label": persona === "patient" ? "Patient" : "Admin",
     style: {
@@ -7045,7 +7377,13 @@ const App = () => {
   }, /*#__PURE__*/React.createElement(PersonaBar, {
     persona: persona,
     onChange: setPersona
-  }), persona === "patient" ? /*#__PURE__*/React.createElement(PatientAppWithJumps, null) : /*#__PURE__*/React.createElement(AdminApp, null)), /*#__PURE__*/React.createElement(TweaksPanel, {
+  }), persona === "patient" ? /*#__PURE__*/React.createElement(PatientAppWithJumps, {
+    onScreenChange: setActiveScreen
+  }) : /*#__PURE__*/React.createElement(AdminApp, {
+    onScreenChange: setActiveScreen
+  })), /*#__PURE__*/React.createElement(FeedbackWidget, {
+    screen: activeScreen
+  }), /*#__PURE__*/React.createElement(TweaksPanel, {
     title: "Tweaks"
   }, /*#__PURE__*/React.createElement(TweakSection, {
     title: "Theme"
