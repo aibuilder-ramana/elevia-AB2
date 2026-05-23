@@ -4,3 +4,17 @@ Feedback submitted from the static prototype is appended below by the Railway fe
 
 ---
 
+## 2026-05-23T11:42:37.931Z
+Project: elevia-AB2
+Screen: Deployment smoke test
+Screen ID: smoke:test
+Rating: Text feedback
+Client ID: codex-smoke-test
+Client timestamp: 2026-05-23T11:45:00.000Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1200x800
+
+Feedback:
+> Smoke test: feedback service can append to feedback.txt.
+
+---
