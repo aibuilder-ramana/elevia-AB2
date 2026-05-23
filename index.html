@@ -6873,87 +6873,121 @@ const FeedbackWidget = ({
       console.warn("Feedback was saved locally but not sent.", e);
     }
   };
-  const buttonStyle = active => ({
-    width: 34,
-    height: 34,
+  const buttonStyle = (active, tone = "neutral") => {
+    const isPositive = tone === "positive";
+    const isNegative = tone === "negative";
+    const activeBg = isPositive ? "var(--sage-deep)" : isNegative ? "#9f4d43" : "var(--ink)";
+    const activeBorder = isPositive ? "var(--sage-deep)" : isNegative ? "#9f4d43" : "var(--ink)";
+    return {
+    height: 38,
+    padding: "0 12px",
     borderRadius: 8,
-    border: `1px solid ${active ? "var(--ink)" : "var(--border)"}`,
-    background: active ? "var(--ink)" : "var(--paper)",
+    border: `1px solid ${active ? activeBorder : "var(--border-strong)"}`,
+    background: active ? activeBg : "var(--paper)",
     color: active ? "var(--paper)" : "var(--muted)",
     display: "inline-flex",
     alignItems: "center",
     justifyContent: "center",
+    gap: 7,
     cursor: status === "saving" ? "wait" : "pointer",
-    transition: "all .12s"
-  });
+    transition: "all .12s",
+    fontFamily: "var(--font-sans)",
+    fontSize: 12.5,
+    fontWeight: 600,
+    whiteSpace: "nowrap"
+    };
+  };
   return /*#__PURE__*/React.createElement("div", {
     style: {
       position: "fixed",
       top: 44,
       right: 18,
       zIndex: 140,
-      width: open ? 320 : "auto",
+      width: open ? 350 : 430,
       maxWidth: "calc(100vw - 24px)",
       fontFamily: "var(--font-sans)",
       color: "var(--ink)"
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      background: "rgba(255,255,255,0.88)",
-      border: "1px solid var(--border)",
-      borderRadius: 10,
-      boxShadow: "0 16px 40px rgba(0,0,0,0.1)",
+      background: "rgba(255,255,255,0.94)",
+      border: "1.5px solid var(--sage)",
+      borderRadius: 12,
+      boxShadow: "0 18px 46px rgba(31,36,33,0.16)",
       backdropFilter: "blur(18px)",
-      padding: open ? 12 : 6
+      padding: open ? 14 : 10
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       alignItems: "center",
-      gap: 6
+      justifyContent: "space-between",
+      gap: 12,
+      marginBottom: 9
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      minWidth: 0
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      color: "var(--sage-deep)",
+      fontSize: 10.5,
+      fontWeight: 700,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase",
+      lineHeight: 1.2
+    }
+  }, "Client feedback"), /*#__PURE__*/React.createElement("div", {
+    title: screen.label,
+    style: {
+      marginTop: 2,
+      maxWidth: open ? 270 : 330,
+      overflow: "hidden",
+      whiteSpace: "nowrap",
+      textOverflow: "ellipsis",
+      fontSize: 13,
+      color: "var(--muted)",
+      fontWeight: 500
+    }
+  }, "Review this screen: ", screen.label)), message && /*#__PURE__*/React.createElement("span", {
+    style: {
+      flexShrink: 0,
+      color: status === "failed" ? "#a44a3f" : "var(--sage-deep)",
+      fontSize: 11.5,
+      fontWeight: 700
+    }
+  }, message)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      flexWrap: "wrap"
     }
   }, /*#__PURE__*/React.createElement("button", {
     title: `Thumbs up for ${screen.label}`,
     "aria-label": `Thumbs up for ${screen.label}`,
     disabled: status === "saving",
     onClick: () => submit("up"),
-    style: buttonStyle(lastSentiment === "up")
+    style: buttonStyle(lastSentiment === "up", "positive")
   }, /*#__PURE__*/React.createElement(I.thumbUp, {
     size: 17
-  })), /*#__PURE__*/React.createElement("button", {
+  }), "Good"), /*#__PURE__*/React.createElement("button", {
     title: `Thumbs down for ${screen.label}`,
     "aria-label": `Thumbs down for ${screen.label}`,
     disabled: status === "saving",
     onClick: () => submit("down"),
-    style: buttonStyle(lastSentiment === "down")
+    style: buttonStyle(lastSentiment === "down", "negative")
   }, /*#__PURE__*/React.createElement(I.thumbDown, {
     size: 17
-  })), /*#__PURE__*/React.createElement("button", {
+  }), "Needs work"), /*#__PURE__*/React.createElement("button", {
     title: `Write feedback for ${screen.label}`,
     "aria-label": `Write feedback for ${screen.label}`,
     onClick: () => setOpen(v => !v),
     style: buttonStyle(open)
   }, /*#__PURE__*/React.createElement(I.info, {
     size: 17
-  })), /*#__PURE__*/React.createElement("div", {
-    style: {
-      width: 1,
-      height: 20,
-      background: "var(--border)",
-      margin: "0 2px"
-    }
-  }), /*#__PURE__*/React.createElement("div", {
-    title: screen.label,
-    style: {
-      maxWidth: open ? 150 : 118,
-      overflow: "hidden",
-      whiteSpace: "nowrap",
-      textOverflow: "ellipsis",
-      fontSize: 11.5,
-      color: "var(--muted)",
-      fontWeight: 500
-    }
-  }, screen.label)), open && /*#__PURE__*/React.createElement("div", {
+  }), "Add note")), open && /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 10,
       display: "grid",
@@ -6964,7 +6998,7 @@ const FeedbackWidget = ({
     onChange: e => setNote(e.target.value),
     rows: 4,
     maxLength: 2000,
-    placeholder: "Feedback for this screen...",
+      placeholder: "What should change on this screen?",
     style: {
       width: "100%",
       resize: "vertical",
@@ -7000,7 +7034,7 @@ const FeedbackWidget = ({
       fontSize: 12.5,
       fontWeight: 600
     }
-  }, status === "saving" ? "Saving..." : "Save"), /*#__PURE__*/React.createElement("button", {
+  }, status === "saving" ? "Saving..." : "Save note"), /*#__PURE__*/React.createElement("button", {
     onClick: () => {
       setOpen(false);
       setNote("");
@@ -7017,22 +7051,7 @@ const FeedbackWidget = ({
       fontFamily: "var(--font-sans)",
       fontSize: 12.5
     }
-  }, "Cancel"), /*#__PURE__*/React.createElement("span", {
-    style: {
-      marginLeft: "auto",
-      color: status === "failed" ? "#a44a3f" : "var(--muted)",
-      fontSize: 11.5,
-      fontWeight: 500
-    }
-  }, message))), !open && message && /*#__PURE__*/React.createElement("div", {
-    style: {
-      marginTop: 6,
-      color: status === "failed" ? "#a44a3f" : "var(--sage-deep)",
-      fontSize: 11.5,
-      textAlign: "center",
-      fontWeight: 600
-    }
-  }, message)));
+  }, "Cancel")))));
 };
 
 /* ============================================================ */
