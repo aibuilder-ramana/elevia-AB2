@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-25T09:16:56.808Z",
+  "updatedAt": "2026-05-25T09:16:59.322Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -25,9 +25,9 @@
       "project": "elevia-AB2",
       "enquiryId": "E-1044",
       "status": "started",
-      "percent": 1,
+      "percent": 10,
       "startedAt": "2026-05-25T09:16:56.807Z",
-      "updatedAt": "2026-05-25T09:16:56.808Z",
+      "updatedAt": "2026-05-25T09:16:59.322Z",
       "completedAt": null,
       "sections": [
         "trauma",
