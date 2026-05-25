@@ -3878,7 +3878,7 @@ const DetailedIntake = ({
   }), /*#__PURE__*/React.createElement(NavRow, {
     onBack: goBack,
     onNext: goNext,
-    nextLabel: onSchedulingStep ? "Confirm visit" : atLastQuestion ? "Continue" : "Next question",
+    nextLabel: onSchedulingStep ? "Request Appointment" : atLastQuestion ? "Continue" : "Next question",
     nextVariant: onSchedulingStep ? "sage" : "primary",
     nextDisabled: onSchedulingStep ? !doctor || !slot : !currentAnswered,
     backLabel: !onSchedulingStep && questionIndex > 0 ? "Previous question" : step === 1 ? "Exit" : "Back"
@@ -4114,7 +4114,7 @@ const SchedulingStep = ({
     style: {
       fontWeight: 500
     }
-  }, "Selected:"), " ", slot.label, " with ", docs.find(d => d.id === doctor).name))));
+  }, "Preferred:"), " ", slot.label, " with ", docs.find(d => d.id === doctor).name))));
 };
 
 /* ============================================================ */
@@ -4156,7 +4156,7 @@ const PatientBooked = ({
       color: "var(--ink)",
       lineHeight: 1.1
     }
-  }, "You're booked."), /*#__PURE__*/React.createElement("p", {
+  }, "Appointment request sent."), /*#__PURE__*/React.createElement("p", {
     style: {
       marginTop: 14,
       fontSize: 17,
@@ -4165,12 +4165,12 @@ const PatientBooked = ({
       margin: "14px auto 0",
       lineHeight: 1.55
     }
-  }, "A confirmation is on its way to ", /*#__PURE__*/React.createElement("b", {
+  }, "The clinic will review your preferred time and send a confirmation to ", /*#__PURE__*/React.createElement("b", {
     style: {
       color: "var(--ink)",
       fontWeight: 500
     }
-  }, enquiry?.email || "your email"), ". Reschedule any time from that link.")), /*#__PURE__*/React.createElement(Card, {
+  }, enquiry?.email || "your email"), " once the appointment is approved.")), /*#__PURE__*/React.createElement(Card, {
     padding: 28
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -4203,7 +4203,7 @@ const PatientBooked = ({
   }, doc?.title, " \xB7 ", doc?.focus)), /*#__PURE__*/React.createElement(Pill, {
     tone: "sage",
     dot: true
-  }, "Confirmed")), /*#__PURE__*/React.createElement("div", {
+  }, "Requested")), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
@@ -4216,7 +4216,7 @@ const PatientBooked = ({
       fontWeight: 500,
       letterSpacing: "0.06em"
     }
-  }, "WHEN"), /*#__PURE__*/React.createElement("div", {
+  }, "PREFERRED TIME"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "var(--font-serif)",
       fontSize: 18,
@@ -4229,27 +4229,27 @@ const PatientBooked = ({
       color: "var(--muted)",
       marginTop: 3
     }
-  }, "50 minutes \xB7 Pacific Time")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, "50 minutes \xB7 pending clinic confirmation")), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11.5,
       color: "var(--muted)",
       fontWeight: 500,
       letterSpacing: "0.06em"
     }
-  }, "HOW"), /*#__PURE__*/React.createElement("div", {
+  }, "REQUEST TYPE"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontFamily: "var(--font-serif)",
       fontSize: 18,
       color: "var(--ink)",
       marginTop: 6
     }
-  }, "Secure video link"), /*#__PURE__*/React.createElement("div", {
+  }, "Secure video preferred"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: "var(--muted)",
       marginTop: 3
     }
-  }, "Sent 1 hr before \xB7 also available in your portal"))), /*#__PURE__*/React.createElement("div", {
+  }, "The clinic will share visit details after confirmation"))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: "flex",
       gap: 10,
@@ -4258,13 +4258,13 @@ const PatientBooked = ({
   }, /*#__PURE__*/React.createElement(Button, {
     variant: "primary",
     size: "md",
-    icon: /*#__PURE__*/React.createElement(I.cal, {
+    icon: /*#__PURE__*/React.createElement(I.edit, {
       size: 16
     })
-  }, "Add to calendar"), /*#__PURE__*/React.createElement(Button, {
+  }, "Edit request"), /*#__PURE__*/React.createElement(Button, {
     variant: "secondary",
     size: "md"
-  }, "Reschedule"))), /*#__PURE__*/React.createElement("div", {
+  }, "Request a different time"))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 36,
       padding: 22,
@@ -4279,7 +4279,7 @@ const PatientBooked = ({
       color: "var(--ink)",
       marginBottom: 10
     }
-  }, "Before your visit"), /*#__PURE__*/React.createElement("ul", {
+  }, "While we review your request"), /*#__PURE__*/React.createElement("ul", {
     style: {
       margin: 0,
       paddingLeft: 18,
@@ -4287,7 +4287,7 @@ const PatientBooked = ({
       color: "var(--muted)",
       lineHeight: 1.7
     }
-  }, /*#__PURE__*/React.createElement("li", null, "Find a private, quiet space with a stable connection."), /*#__PURE__*/React.createElement("li", null, "Have your insurance card and a list of any current medications."), /*#__PURE__*/React.createElement("li", null, "Take a few minutes to jot down anything you'd like to share."))), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement("li", null, "Watch for a confirmation from the clinic."), /*#__PURE__*/React.createElement("li", null, "Have your insurance card and a list of any current medications ready."), /*#__PURE__*/React.createElement("li", null, "Take a few minutes to jot down anything you'd like to share."))), /*#__PURE__*/React.createElement("div", {
     style: {
       marginTop: 22,
       textAlign: "center"
@@ -4343,6 +4343,10 @@ const statusMap = {
   },
   "intake-done": {
     label: "Intake complete",
+    tone: "sage"
+  },
+  "appointment-requested": {
+    label: "Appt requested",
     tone: "sage"
   },
   "scheduled": {
@@ -4588,6 +4592,10 @@ const AdminDashboard = () => {
     id: "intake-sent",
     label: "Intake sent",
     count: enquiries.filter(e => e.status === "intake-sent").length
+  }, {
+    id: "appointment-requested",
+    label: "Appt requested",
+    count: enquiries.filter(e => e.status === "appointment-requested").length
   }, {
     id: "scheduled",
     label: "Scheduled",
@@ -7360,7 +7368,7 @@ const PatientApp = ({
     const labels = {
       landing: "Patient landing",
       status: "Patient status",
-      booked: "Patient booking confirmation"
+      booked: "Patient appointment request"
     };
     onScreenChange?.({
       id: `patient:${screen}`,
@@ -7405,7 +7413,7 @@ const PatientApp = ({
       onScreenChange: onScreenChange,
       onSubmit: b => {
         if (myEnquiry) updateEnquiry(myEnquiry.id, {
-          status: "scheduled",
+          status: "appointment-requested",
           intakeDoneAt: new Date().toISOString(),
           doctor: b.doctor
         });
