@@ -1964,6 +1964,8 @@ const seedEnquiries = [{
   createdAt: "2026-05-19T16:42:00",
   calledAt: "2026-05-20T09:10:00",
   intakeSentAt: "2026-05-20T09:22:00",
+  intakeStartedAt: "2026-05-20T10:15:00",
+  intakeProgress: 42,
   urgent: false,
   doctor: null
 }, {
@@ -3794,7 +3796,8 @@ const DetailedIntake = ({
   sections,
   onSubmit,
   onExit,
-  onScreenChange
+  onScreenChange,
+  onProgress
 }) => {
   // Build module list dynamically from issues
   const selectedSections = normalizeIntakeSections(sections);
@@ -3807,6 +3810,7 @@ const DetailedIntake = ({
   const [answers, setAnswers] = React.useState({});
   const [doctor, setDoctor] = React.useState(null);
   const [slot, setSlot] = React.useState(null);
+  const lastProgressRef = React.useRef(null);
   const set = (k, v) => setAnswers(a => ({
     ...a,
     [k]: v
@@ -3824,6 +3828,20 @@ const DetailedIntake = ({
   const currentQuestion = !onSchedulingStep ? currentModule?.questions?.[questionIndex] : null;
   const currentAnswered = onSchedulingStep || hasQuestionAnswer(currentQuestion, answers[currentQuestion?.id]);
   const atLastQuestion = !currentModule || questionIndex >= currentModule.questions.length - 1;
+  const questionCount = modules.reduce((sum, mod) => sum + (mod.questions?.length || 0), 0);
+  const completedBeforeCurrent = modules.slice(0, Math.max(0, step - 1)).reduce((sum, mod) => sum + (mod.questions?.length || 0), 0);
+  const completedUnits = onSchedulingStep ? questionCount + (doctor || slot ? 1 : 0) : completedBeforeCurrent + questionIndex + (currentAnswered ? 1 : 0);
+  const progressPercent = Math.max(1, Math.min(99, Math.round(completedUnits / Math.max(questionCount + 1, 1) * 100)));
+  React.useEffect(() => {
+    if (!enquiry?.id || !onProgress) return;
+    const progressKey = `${enquiry.id}:${progressPercent}`;
+    if (lastProgressRef.current === progressKey) return;
+    lastProgressRef.current = progressKey;
+    onProgress({
+      startedAt: new Date().toISOString(),
+      percent: progressPercent
+    });
+  }, [enquiry?.id, progressPercent]);
   const goBack = () => {
     if (!onSchedulingStep && questionIndex > 0) {
       setQuestionIndex(i => i - 1);
@@ -4913,8 +4931,12 @@ const EnquiryDetail = ({
     style: {
       padding: 32
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(DetailedIntakeLinkCard, {
+    enquiry: enquiry,
+    onSend: () => setShowSendIntake(true)
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
+      marginTop: 32,
       display: "grid",
       gridTemplateColumns: "1fr 1fr",
       gap: 32
@@ -4993,7 +5015,8 @@ const EnquiryDetail = ({
   }, /*#__PURE__*/React.createElement(SectionTitle, null, "Timeline"), /*#__PURE__*/React.createElement(Timeline, {
     enquiry: enquiry
   }))), tab === "intake" && /*#__PURE__*/React.createElement(IntakePanel, {
-    enquiry: enquiry
+    enquiry: enquiry,
+    onSend: () => setShowSendIntake(true)
   }), tab === "notes" && /*#__PURE__*/React.createElement(NotesPanel, {
     enquiry: enquiry
   }), tab === "activity" && /*#__PURE__*/React.createElement(ActivityPanel, {
@@ -5023,6 +5046,191 @@ const DetailSection = ({
     gap: 10
   }
 }, children));
+const detailedIntakeSectionsFor = enquiry => [...new Set([...(enquiry.issues || []), "care", "prefs"])];
+const getIntakeProgress = enquiry => {
+  if (enquiry.intakeDoneAt || enquiry.status === "appointment-requested" || enquiry.status === "scheduled") {
+    return {
+      state: "completed",
+      percent: 100,
+      label: "Completed",
+      detail: enquiry.intakeDoneAt ? `Completed ${fmtRelative(enquiry.intakeDoneAt)}` : "Completed and appointment request submitted"
+    };
+  }
+  if (enquiry.intakeStartedAt || Number(enquiry.intakeProgress) > 0) {
+    const percent = Math.max(1, Math.min(99, Number(enquiry.intakeProgress) || 35));
+    return {
+      state: "started",
+      percent,
+      label: `Started · ${percent}% complete`,
+      detail: `Last activity ${fmtRelative(enquiry.intakeStartedAt || enquiry.intakeSentAt || enquiry.createdAt)}`
+    };
+  }
+  if (enquiry.intakeSentAt) {
+    return {
+      state: "not-started",
+      percent: 0,
+      label: "Not started",
+      detail: `Link sent ${fmtRelative(enquiry.intakeSentAt)}`
+    };
+  }
+  return {
+    state: "not-sent",
+    percent: 0,
+    label: "Not sent",
+    detail: "Send the detailed intake link after your initial call."
+  };
+};
+const DetailedIntakeLinkCard = ({
+  enquiry,
+  onSend
+}) => {
+  const {
+    flash
+  } = useStore();
+  const sections = detailedIntakeSectionsFor(enquiry);
+  const intakeLink = intakeUrlFor(enquiry.id, sections);
+  const displayPath = displayIntakePathFor(enquiry.id);
+  const progress = getIntakeProgress(enquiry);
+  const copyLink = async () => {
+    try {
+      await navigator.clipboard.writeText(intakeLink);
+      flash("Detailed intake link copied");
+    } catch (e) {
+      window.prompt("Copy detailed intake link", intakeLink);
+    }
+  };
+  const openLink = () => window.open(intakeLink, "_blank", "noopener,noreferrer");
+  const progressTone = progress.state === "completed" ? "sage" : progress.state === "started" ? "amber" : "neutral";
+  return /*#__PURE__*/React.createElement(Card, {
+    style: {
+      background: "var(--bg)"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 18,
+      marginBottom: 16
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SectionTitle, null, "Detailed intake"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 8,
+      fontFamily: "var(--font-serif)",
+      fontSize: 19,
+      color: "var(--ink)"
+    }
+  }, "Patient intake form"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 3,
+      color: "var(--muted)",
+      fontSize: 13
+    }
+  }, progress.detail)), /*#__PURE__*/React.createElement(Pill, {
+    tone: progressTone,
+    dot: progress.state !== "not-sent"
+  }, progress.label)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gridTemplateColumns: "minmax(0, 1fr) auto",
+      gap: 12,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: openLink,
+    title: intakeLink,
+    style: {
+      minWidth: 0,
+      border: "1px solid var(--border)",
+      background: "var(--paper)",
+      borderRadius: 10,
+      padding: "11px 12px",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      color: "var(--ink)",
+      cursor: "pointer",
+      fontFamily: "var(--font-sans)",
+      textAlign: "left"
+    }
+  }, /*#__PURE__*/React.createElement(I.link, {
+    size: 15,
+    style: {
+      color: "var(--muted)",
+      flexShrink: 0
+    }
+  }), /*#__PURE__*/React.createElement("code", {
+    style: {
+      overflow: "hidden",
+      textOverflow: "ellipsis",
+      whiteSpace: "nowrap",
+      fontSize: 12.5,
+      color: "var(--ink)"
+    }
+  }, displayPath)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement(Button, {
+    variant: "secondary",
+    size: "sm",
+    icon: /*#__PURE__*/React.createElement(I.copy, {
+      size: 13
+    }),
+    onClick: copyLink
+  }, "Copy"), /*#__PURE__*/React.createElement(Button, {
+    variant: "ghost",
+    size: "sm",
+    icon: /*#__PURE__*/React.createElement(I.arrowR, {
+      size: 13
+    }),
+    onClick: openLink
+  }, "Open"))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16,
+      display: "grid",
+      gridTemplateColumns: "1fr auto",
+      gap: 12,
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement(ProgressBar, {
+    value: progress.percent
+  }), /*#__PURE__*/React.createElement("span", {
+    style: {
+      fontSize: 12,
+      color: "var(--muted)",
+      fontVariantNumeric: "tabular-nums",
+      minWidth: 88,
+      textAlign: "right"
+    }
+  }, progress.state === "not-started" || progress.state === "not-sent" ? "0% complete" : `${progress.percent}% complete`)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 14,
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 12,
+      flexWrap: "wrap"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 6
+    }
+  }, sections.map(s => /*#__PURE__*/React.createElement(Pill, {
+    key: s,
+    tone: "neutral"
+  }, s === "care" ? "Care history" : s === "prefs" ? "Preferences" : ELEVIA_DATA.ISSUES.find(i => i.id === s)?.label || s))), /*#__PURE__*/React.createElement(Button, {
+    variant: progress.state === "not-sent" ? "primary" : "secondary",
+    size: "sm",
+    icon: /*#__PURE__*/React.createElement(I.send, {
+      size: 13
+    }),
+    onClick: onSend
+  }, progress.state === "not-sent" ? "Send link" : "Resend link")));
+};
 const DetailRow = ({
   icon,
   label,
@@ -5121,16 +5329,21 @@ const Timeline = ({
   }, fmtTime(ev.when)))));
 };
 const IntakePanel = ({
-  enquiry
+  enquiry,
+  onSend
 }) => {
   if (!enquiry.intakeDoneAt) {
     return /*#__PURE__*/React.createElement("div", {
       style: {
         padding: 32
       }
-    }, /*#__PURE__*/React.createElement(Card, {
+    }, /*#__PURE__*/React.createElement(DetailedIntakeLinkCard, {
+      enquiry: enquiry,
+      onSend: onSend
+    }), /*#__PURE__*/React.createElement(Card, {
       style: {
-        background: "var(--bg)"
+        background: "var(--bg)",
+        marginTop: 14
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
@@ -5173,15 +5386,20 @@ const IntakePanel = ({
       size: "sm",
       icon: /*#__PURE__*/React.createElement(I.send, {
         size: 14
-      })
+      }),
+      onClick: onSend
     }, enquiry.intakeSentAt ? "Resend link" : "Send link"))));
   }
   return /*#__PURE__*/React.createElement("div", {
     style: {
       padding: 32
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(DetailedIntakeLinkCard, {
+    enquiry: enquiry,
+    onSend: onSend
+  }), /*#__PURE__*/React.createElement("div", {
     style: {
+      marginTop: 28,
       display: "flex",
       alignItems: "center",
       justifyContent: "space-between",
@@ -5911,6 +6129,8 @@ const buildContext = (enquiries, appointments) => {
     createdAt: e.createdAt,
     calledAt: e.calledAt || null,
     intakeSentAt: e.intakeSentAt || null,
+    intakeStartedAt: e.intakeStartedAt || null,
+    intakeProgress: e.intakeProgress || null,
     intakeDoneAt: e.intakeDoneAt || null,
     scheduledFor: e.scheduledFor || null,
     doctor: e.doctor || null
@@ -7411,10 +7631,17 @@ const PatientApp = ({
       sections: intakeRoute?.sections,
       onExit: () => setScreen(myEnquiry ? "status" : "landing"),
       onScreenChange: onScreenChange,
+      onProgress: progress => {
+        if (myEnquiry) updateEnquiry(myEnquiry.id, {
+          intakeStartedAt: myEnquiry.intakeStartedAt || progress.startedAt,
+          intakeProgress: Math.max(Number(myEnquiry.intakeProgress) || 0, progress.percent)
+        });
+      },
       onSubmit: b => {
         if (myEnquiry) updateEnquiry(myEnquiry.id, {
           status: "appointment-requested",
           intakeDoneAt: new Date().toISOString(),
+          intakeProgress: 100,
           doctor: b.doctor
         });
         setBooking(b);
