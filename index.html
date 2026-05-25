@@ -3347,11 +3347,42 @@ Object.assign(window, {
 /* Dynamic question modules by issue */
 const ISSUE_MODULES = {
   anxiety: {
-    title: "About your anxiety",
+    title: "Anxiety check-in (GAD-7)",
+    intro: "I'll ask the anxiety questions one at a time, like a short conversation. Pick the answer that feels closest.",
     questions: [{
-      id: "phq_freq",
+      id: "gad_nervous",
       kind: "scale",
       q: "Over the last 2 weeks, how often have you been bothered by feeling nervous, anxious, or on edge?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_control",
+      kind: "scale",
+      q: "How often has it felt hard to stop or control the worrying?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_worry",
+      kind: "scale",
+      q: "How often have you found yourself worrying about several different things?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_relax",
+      kind: "scale",
+      q: "How often has it been difficult to relax?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_restless",
+      kind: "scale",
+      q: "How often have you felt so restless that it was hard to sit still?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_irritable",
+      kind: "scale",
+      q: "How often have you felt easily annoyed or irritable?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "gad_fear",
+      kind: "scale",
+      q: "How often have you felt afraid, as if something awful might happen?",
       scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
     }, {
       id: "panic",
@@ -3366,7 +3397,8 @@ const ISSUE_MODULES = {
     }]
   },
   depression: {
-    title: "About your mood",
+    title: "Mood check-in (PHQ-9)",
+    intro: "These mood questions can feel personal, so we'll move through them one at a time.",
     questions: [{
       id: "phq_low",
       kind: "scale",
@@ -3376,6 +3408,36 @@ const ISSUE_MODULES = {
       id: "phq_down",
       kind: "scale",
       q: "How often have you felt down, depressed, or hopeless?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_sleep",
+      kind: "scale",
+      q: "How often has your sleep been disrupted, either too little or too much?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_energy",
+      kind: "scale",
+      q: "How often have you felt tired or low on energy?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_appetite",
+      kind: "scale",
+      q: "How often has your appetite changed noticeably?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_self",
+      kind: "scale",
+      q: "How often have you been hard on yourself or felt like you let yourself or others down?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_focus",
+      kind: "scale",
+      q: "How often has it been hard to concentrate on reading, watching something, or work?",
+      scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
+    }, {
+      id: "phq_movement",
+      kind: "scale",
+      q: "How often have others noticed you moving or speaking much slower, or feeling unusually restless?",
       scale: ["Not at all", "Several days", "More than half the days", "Nearly every day"]
     }, {
       id: "safety",
@@ -3534,18 +3596,20 @@ const PREF_MODULE = {
 const QuestionBlock = ({
   q,
   value,
-  onChange
+  onChange,
+  hideQuestion = false
 }) => {
+  const prompt = hideQuestion ? null : /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 15,
+      color: "var(--ink)",
+      marginBottom: 14,
+      lineHeight: 1.5,
+      fontWeight: 500
+    }
+  }, q.q);
   if (q.kind === "scale") {
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 15,
-        color: "var(--ink)",
-        marginBottom: 14,
-        lineHeight: 1.5,
-        fontWeight: 500
-      }
-    }, q.q), /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", null, prompt, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
         gridTemplateColumns: `repeat(${q.scale.length}, 1fr)`,
@@ -3580,15 +3644,7 @@ const QuestionBlock = ({
     }, label)))));
   }
   if (q.kind === "radio") {
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 15,
-        color: "var(--ink)",
-        marginBottom: 14,
-        lineHeight: 1.5,
-        fontWeight: 500
-      }
-    }, q.q), /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", null, prompt, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "grid",
         gap: 8
@@ -3602,15 +3658,7 @@ const QuestionBlock = ({
   }
   if (q.kind === "chips") {
     const arr = Array.isArray(value) ? value : [];
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 15,
-        color: "var(--ink)",
-        marginBottom: 14,
-        lineHeight: 1.5,
-        fontWeight: 500
-      }
-    }, q.q), /*#__PURE__*/React.createElement("div", {
+    return /*#__PURE__*/React.createElement("div", null, prompt, /*#__PURE__*/React.createElement("div", {
       style: {
         display: "flex",
         flexWrap: "wrap",
@@ -3623,15 +3671,7 @@ const QuestionBlock = ({
     }, o))));
   }
   if (q.kind === "text") {
-    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 15,
-        color: "var(--ink)",
-        marginBottom: 14,
-        lineHeight: 1.5,
-        fontWeight: 500
-      }
-    }, q.q), /*#__PURE__*/React.createElement(Textarea, {
+    return /*#__PURE__*/React.createElement("div", null, prompt, /*#__PURE__*/React.createElement(Textarea, {
       value: value,
       onChange: onChange,
       rows: 5,
@@ -3640,6 +3680,110 @@ const QuestionBlock = ({
   }
   return null;
 };
+const hasQuestionAnswer = (q, value) => {
+  if (!q) return false;
+  if (q.kind === "chips") return Array.isArray(value) && value.length > 0;
+  if (q.kind === "text") return !!String(value || "").trim();
+  return value !== undefined && value !== null && value !== "";
+};
+const formatQuestionAnswer = (q, value) => {
+  if (!hasQuestionAnswer(q, value)) return "Not answered yet";
+  if (q.kind === "scale") return q.scale?.[value] || String(value);
+  if (q.kind === "chips") return value.join(", ");
+  return String(value);
+};
+const ConversationalIntakeModule = ({
+  mod,
+  questionIndex,
+  answers,
+  onChange
+}) => {
+  const current = mod.questions[questionIndex];
+  const previous = mod.questions.slice(0, questionIndex).slice(-3);
+  const progress = Math.round(questionIndex / Math.max(mod.questions.length, 1) * 100);
+  const assistantBubble = (children, key) => /*#__PURE__*/React.createElement("div", {
+    key: key,
+    style: {
+      maxWidth: 560,
+      padding: "13px 16px",
+      borderRadius: "14px 14px 14px 4px",
+      background: "var(--paper)",
+      border: "1px solid var(--border)",
+      color: "var(--ink)",
+      fontSize: 14,
+      lineHeight: 1.55,
+      boxShadow: "0 8px 24px rgba(0,0,0,0.035)"
+    }
+  }, children);
+  const userBubble = (children, key) => /*#__PURE__*/React.createElement("div", {
+    key: key,
+    style: {
+      maxWidth: 460,
+      marginLeft: "auto",
+      padding: "11px 14px",
+      borderRadius: "14px 14px 4px 14px",
+      background: "var(--sage-tint)",
+      color: "var(--sage-deep)",
+      fontSize: 13.5,
+      lineHeight: 1.45,
+      fontWeight: 500
+    }
+  }, children);
+  return /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 8
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      gap: 16,
+      fontSize: 12,
+      color: "var(--muted)",
+      fontWeight: 600
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Question ", questionIndex + 1, " of ", mod.questions.length), /*#__PURE__*/React.createElement("span", null, progress, "% complete")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 6,
+      borderRadius: 999,
+      background: "var(--border)",
+      overflow: "hidden"
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      width: `${progress}%`,
+      height: "100%",
+      background: "var(--sage)",
+      borderRadius: 999,
+      transition: "width .2s"
+    }
+  }))), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "grid",
+      gap: 12
+    }
+  }, questionIndex === 0 && assistantBubble(mod.intro || "I'll ask a few questions one at a time. Your answers help the clinician prepare before the first visit.", "intro"), previous.flatMap(q => [assistantBubble(q.q, `${q.id}-q`), userBubble(formatQuestionAnswer(q, answers[q.id]), `${q.id}-a`)]), assistantBubble(current.q, `${current.id}-current`)), /*#__PURE__*/React.createElement("div", {
+    style: {
+      padding: 18,
+      borderRadius: 14,
+      background: "var(--paper)",
+      border: "1px solid var(--border)",
+      boxShadow: "0 12px 28px rgba(0,0,0,0.045)"
+    }
+  }, /*#__PURE__*/React.createElement(QuestionBlock, {
+    q: current,
+    value: answers[current.id],
+    onChange: onChange,
+    hideQuestion: true
+  })));
+};
 
 /* ============================================================ */
 /*  DETAILED INTAKE                                              */
@@ -3647,16 +3791,19 @@ const QuestionBlock = ({
 
 const DetailedIntake = ({
   enquiry,
+  sections,
   onSubmit,
   onExit,
   onScreenChange
 }) => {
   // Build module list dynamically from issues
-  const issueModules = (enquiry?.issues || ["anxiety"]).map(id => ISSUE_MODULES[id]).filter(Boolean);
-  const modules = [...issueModules, HISTORY_MODULE, PREF_MODULE];
+  const selectedSections = normalizeIntakeSections(sections);
+  const issueModules = selectedSections.length ? selectedSections.map(id => id === "care" ? HISTORY_MODULE : id === "prefs" ? PREF_MODULE : ISSUE_MODULES[id]).filter(Boolean) : (enquiry?.issues || ["anxiety"]).map(id => ISSUE_MODULES[id]).filter(Boolean);
+  const modules = selectedSections.length ? issueModules : [...issueModules, HISTORY_MODULE, PREF_MODULE];
   const totalSteps = modules.length + 1; // + scheduling
 
   const [step, setStep] = React.useState(1);
+  const [questionIndex, setQuestionIndex] = React.useState(0);
   const [answers, setAnswers] = React.useState({});
   const [doctor, setDoctor] = React.useState(null);
   const [slot, setSlot] = React.useState(null);
@@ -3667,11 +3814,45 @@ const DetailedIntake = ({
   const onSchedulingStep = step === totalSteps;
   React.useEffect(() => {
     const mod = modules[step - 1];
+    const currentQuestion = mod?.questions?.[questionIndex];
     onScreenChange?.({
-      id: onSchedulingStep ? "patient:detailed-intake-scheduling" : `patient:detailed-intake-step-${step}`,
-      label: onSchedulingStep ? "Patient detailed intake - Scheduling" : `Patient detailed intake - ${mod?.title || `Section ${step}`}`
+      id: onSchedulingStep ? "patient:detailed-intake-scheduling" : `patient:detailed-intake-step-${step}-q-${questionIndex + 1}`,
+      label: onSchedulingStep ? "Patient detailed intake - Scheduling" : `Patient detailed intake - ${mod?.title || `Section ${step}`}${currentQuestion ? ` (${questionIndex + 1}/${mod.questions.length})` : ""}`
     });
-  }, [step, onSchedulingStep]);
+  }, [step, questionIndex, onSchedulingStep]);
+  const currentModule = modules[step - 1];
+  const currentQuestion = !onSchedulingStep ? currentModule?.questions?.[questionIndex] : null;
+  const currentAnswered = onSchedulingStep || hasQuestionAnswer(currentQuestion, answers[currentQuestion?.id]);
+  const atLastQuestion = !currentModule || questionIndex >= currentModule.questions.length - 1;
+  const goBack = () => {
+    if (!onSchedulingStep && questionIndex > 0) {
+      setQuestionIndex(i => i - 1);
+      return;
+    }
+    if (step > 1) {
+      const prevModule = modules[step - 2];
+      setStep(step - 1);
+      setQuestionIndex(Math.max(0, (prevModule?.questions?.length || 1) - 1));
+      return;
+    }
+    onExit();
+  };
+  const goNext = () => {
+    if (!onSchedulingStep && !atLastQuestion) {
+      setQuestionIndex(i => i + 1);
+      return;
+    }
+    if (step < totalSteps) {
+      setStep(step + 1);
+      setQuestionIndex(0);
+      return;
+    }
+    onSubmit({
+      answers,
+      doctor,
+      slot
+    });
+  };
   return /*#__PURE__*/React.createElement(PatientShell, {
     step: step,
     totalSteps: totalSteps,
@@ -3681,18 +3862,13 @@ const DetailedIntake = ({
     return /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(StageHeader, {
       eyebrow: `Section ${step} of ${totalSteps}`,
       title: mod.title,
-      sub: "Your answers go directly to your clinician \u2014 they help shape the first session."
-    }), /*#__PURE__*/React.createElement("div", {
-      style: {
-        display: "grid",
-        gap: 30
-      }
-    }, mod.questions.map(q => /*#__PURE__*/React.createElement(QuestionBlock, {
-      key: q.id,
-      q: q,
-      value: answers[q.id],
-      onChange: v => set(q.id, v)
-    }))));
+      sub: "Your answers go directly to your clinician. We'll keep it focused and conversational."
+    }), /*#__PURE__*/React.createElement(ConversationalIntakeModule, {
+      mod: mod,
+      questionIndex: questionIndex,
+      answers: answers,
+      onChange: v => set(mod.questions[questionIndex].id, v)
+    }));
   })(), onSchedulingStep && /*#__PURE__*/React.createElement(SchedulingStep, {
     enquiry: enquiry,
     doctor: doctor,
@@ -3700,18 +3876,12 @@ const DetailedIntake = ({
     slot: slot,
     setSlot: setSlot
   }), /*#__PURE__*/React.createElement(NavRow, {
-    onBack: step > 1 ? () => setStep(step - 1) : onExit,
-    onNext: () => {
-      if (step < totalSteps) setStep(step + 1);else onSubmit({
-        answers,
-        doctor,
-        slot
-      });
-    },
-    nextLabel: onSchedulingStep ? "Confirm visit" : "Continue",
+    onBack: goBack,
+    onNext: goNext,
+    nextLabel: onSchedulingStep ? "Confirm visit" : atLastQuestion ? "Continue" : "Next question",
     nextVariant: onSchedulingStep ? "sage" : "primary",
-    nextDisabled: onSchedulingStep && (!doctor || !slot),
-    backLabel: step === 1 ? "Exit" : "Back"
+    nextDisabled: onSchedulingStep ? !doctor || !slot : !currentAnswered,
+    backLabel: !onSchedulingStep && questionIndex > 0 ? "Previous question" : step === 1 ? "Exit" : "Back"
   })));
 };
 
@@ -5205,14 +5375,28 @@ const SendIntakeDialog = ({
     flash
   } = useStore();
   const [via, setVia] = React.useState(["email"]);
-  const [include, setInclude] = React.useState({
-    anxiety: true,
-    depression: false,
+  const [include, setInclude] = React.useState(() => {
+    const issues = enquiry.issues || [];
+    return {
+    anxiety: issues.includes("anxiety") || issues.length === 0,
+    depression: issues.includes("depression"),
     care: true,
     prefs: true
+    };
   });
   const [msg, setMsg] = React.useState(`Hi ${enquiry.name.split(" ")[0]},\n\nThanks for the call. Here's the brief intake form — should take about 5 minutes. Once it's in, I'll have scheduling options for you.\n\n— Marisol, Alan Behrman Clinic`);
   const toggleVia = v => setVia(arr => arr.includes(v) ? arr.filter(x => x !== v) : [...arr, v]);
+  const includedSections = normalizeIntakeSections(Object.entries(include).filter(([, v]) => v).map(([k]) => k));
+  const brandedIntakePath = displayIntakePathFor(enquiry.id);
+  const intakeLink = intakeUrlFor(enquiry.id, includedSections);
+  const copyIntakeLink = async () => {
+    try {
+      await navigator.clipboard.writeText(intakeLink);
+      flash("Detailed intake link copied");
+    } catch (e) {
+      window.prompt("Copy detailed intake link", intakeLink);
+    }
+  };
   const send = () => {
     updateEnquiry(enquiry.id, {
       status: "intake-sent",
@@ -5362,16 +5546,24 @@ const SendIntakeDialog = ({
     }
   }, /*#__PURE__*/React.createElement(I.link, {
     size: 15
-  }), /*#__PURE__*/React.createElement("span", null, "Unique link: ", /*#__PURE__*/React.createElement("code", {
+  }), /*#__PURE__*/React.createElement("span", null, "Unique link: ", /*#__PURE__*/React.createElement("a", {
+    href: intakeLink,
+    target: "_blank",
+    rel: "noreferrer",
+    onClick: e => e.stopPropagation(),
+    title: intakeLink,
     style: {
+      display: "inline-flex",
+      alignItems: "center",
       background: "var(--paper)",
       padding: "2px 7px",
       borderRadius: 5,
       fontSize: 12,
       color: "var(--ink)",
-      border: "1px solid var(--border)"
+      border: "1px solid var(--border)",
+      fontFamily: "var(--font-mono)"
     }
-  }, "elevia.care/intake/", enquiry.id.toLowerCase(), "-", Math.random().toString(36).slice(2, 8))), /*#__PURE__*/React.createElement("span", {
+  }, brandedIntakePath)), /*#__PURE__*/React.createElement("span", {
     style: {
       flex: 1
     }
@@ -5380,7 +5572,8 @@ const SendIntakeDialog = ({
     size: "sm",
     icon: /*#__PURE__*/React.createElement(I.copy, {
       size: 13
-    })
+    }),
+    onClick: copyIntakeLink
   }, "Copy"))), /*#__PURE__*/React.createElement("div", {
     style: {
       padding: "18px 28px",
@@ -6814,6 +7007,35 @@ const keepFeedbackCopy = entry => {
     localStorage.setItem(FEEDBACK_LOCAL_KEY, JSON.stringify(current.slice(-100)));
   } catch (e) {}
 };
+const INTAKE_SECTION_KEYS = ["anxiety", "depression", "trauma", "relationship", "grief", "adhd", "sleep", "addiction", "stress", "other", "care", "prefs"];
+const normalizeIntakeSections = sections => (sections || []).map(s => String(s || "").trim().toLowerCase()).filter(s => INTAKE_SECTION_KEYS.includes(s));
+const intakeTokenFor = id => {
+  let hash = 0;
+  String(id || "intake").split("").forEach(ch => {
+    hash = (hash << 5) - hash + ch.charCodeAt(0);
+    hash |= 0;
+  });
+  return Math.abs(hash).toString(36).padStart(6, "0").slice(0, 6);
+};
+const intakeSlugFor = id => `${String(id || "E-0000").toLowerCase()}-${intakeTokenFor(id)}`;
+const displayIntakePathFor = id => `elevia.care/intake/${intakeSlugFor(id)}`;
+const intakeUrlFor = (id, sections = []) => {
+  const params = new URLSearchParams();
+  params.set("intake", intakeSlugFor(id));
+  const normalized = normalizeIntakeSections(sections);
+  if (normalized.length) params.set("sections", normalized.join(","));
+  return `${window.location.origin}${window.location.pathname}?${params.toString()}`;
+};
+const readIntakeRoute = () => {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("intake") || "";
+  const id = slug.match(/^(e-\d+)/i)?.[1]?.toUpperCase();
+  if (!id) return null;
+  return {
+    id,
+    sections: normalizeIntakeSections((params.get("sections") || "").split(","))
+  };
+};
 const FeedbackWidget = ({
   screen = feedbackScreenFallback
 }) => {
@@ -7128,8 +7350,9 @@ const PatientApp = ({
     updateEnquiry,
     enquiries
   } = useStore();
-  const [screen, setScreen] = React.useState("landing"); // landing, enquiry, status, detailed, booked
-  const [myEnquiryId, setMyEnquiryId] = React.useState(null);
+  const intakeRoute = React.useMemo(() => readIntakeRoute(), []);
+  const [screen, setScreen] = React.useState(intakeRoute ? "detailed" : "landing"); // landing, enquiry, status, detailed, booked
+  const [myEnquiryId, setMyEnquiryId] = React.useState(intakeRoute?.id || null);
   const [booking, setBooking] = React.useState(null);
   const myEnquiry = enquiries.find(e => e.id === myEnquiryId);
   React.useEffect(() => {
@@ -7177,7 +7400,8 @@ const PatientApp = ({
         name: "Friend",
         email: "you@email.com"
       },
-      onExit: () => setScreen("status"),
+      sections: intakeRoute?.sections,
+      onExit: () => setScreen(myEnquiry ? "status" : "landing"),
       onScreenChange: onScreenChange,
       onSubmit: b => {
         if (myEnquiry) updateEnquiry(myEnquiry.id, {
