@@ -2166,6 +2166,24 @@ const StoreProvider = ({
     setToast(msg);
     setTimeout(() => setToast(null), 2400);
   };
+  React.useEffect(() => {
+    let active = true;
+    const refreshIntakeProgress = async () => {
+      try {
+        const patients = await fetchIntakeProgressRecords();
+        if (active) setEnquiries(list => mergeIntakeProgressIntoEnquiries(list, patients));
+      } catch (e) {
+        const local = readLocalIntakeProgress();
+        if (active && Object.keys(local).length) setEnquiries(list => mergeIntakeProgressIntoEnquiries(list, local));
+      }
+    };
+    refreshIntakeProgress();
+    const timer = setInterval(refreshIntakeProgress, 30000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, []);
   window.__elvStore = { enquiries, appointments };
   return /*#__PURE__*/React.createElement(StoreCtx.Provider, {
     value: {
@@ -7235,6 +7253,79 @@ const keepFeedbackCopy = entry => {
     localStorage.setItem(FEEDBACK_LOCAL_KEY, JSON.stringify(current.slice(-100)));
   } catch (e) {}
 };
+const INTAKE_PROGRESS_LOCAL_KEY = "elevia-ab2-intake-progress";
+const readLocalIntakeProgress = () => {
+  try {
+    const data = JSON.parse(localStorage.getItem(INTAKE_PROGRESS_LOCAL_KEY) || "{}");
+    return data && typeof data === "object" ? data : {};
+  } catch (e) {
+    return {};
+  }
+};
+const keepIntakeProgressCopy = progress => {
+  try {
+    const current = readLocalIntakeProgress();
+    const existing = current[progress.enquiryId] || {};
+    current[progress.enquiryId] = {
+      ...existing,
+      ...progress,
+      percent: Math.max(Number(existing.percent) || 0, Number(progress.percent) || 0),
+      status: existing.status === "completed" || progress.status === "completed" ? "completed" : "started",
+      startedAt: existing.startedAt || progress.startedAt || progress.updatedAt
+    };
+    localStorage.setItem(INTAKE_PROGRESS_LOCAL_KEY, JSON.stringify(current));
+  } catch (e) {}
+};
+const mergeIntakeProgressIntoEnquiries = (list, patients = {}) => list.map(enquiry => {
+  const progress = patients[enquiry.id];
+  if (!progress) return enquiry;
+  const completed = progress.status === "completed" || Number(progress.percent) >= 100;
+  const remotePercent = Number(progress.percent) || 0;
+  const existingPercent = Number(enquiry.intakeProgress) || 0;
+  const nextStatus = completed && !["appointment-requested", "scheduled"].includes(enquiry.status) ? "appointment-requested" : enquiry.status;
+  return {
+    ...enquiry,
+    status: nextStatus,
+    intakeStartedAt: progress.startedAt || progress.updatedAt || enquiry.intakeStartedAt,
+    intakeProgress: completed ? 100 : Math.max(existingPercent, Math.min(99, remotePercent)),
+    intakeDoneAt: progress.completedAt || enquiry.intakeDoneAt,
+    doctor: progress.doctor || enquiry.doctor
+  };
+});
+const fetchIntakeProgressRecords = async () => {
+  const endpoint = `${FEEDBACK_API_URL.replace(/\/$/, "")}/api/intake-progress`;
+  const res = await fetch(endpoint, {
+    headers: {
+      "Accept": "application/json"
+    }
+  });
+  if (!res.ok) throw new Error(`Intake progress API returned ${res.status}`);
+  const data = await res.json();
+  return data.patients || {};
+};
+const sendIntakeProgress = async progress => {
+  const entry = {
+    project: "elevia-AB2",
+    sourceUrl: window.location.href,
+    clientId: getFeedbackClientId(),
+    updatedAt: new Date().toISOString(),
+    ...progress
+  };
+  keepIntakeProgressCopy(entry);
+  try {
+    const endpoint = `${FEEDBACK_API_URL.replace(/\/$/, "")}/api/intake-progress`;
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(entry)
+    });
+    if (!res.ok) throw new Error(`Intake progress API returned ${res.status}`);
+  } catch (e) {
+    console.warn("Intake progress was saved locally but not sent.", e);
+  }
+};
 const INTAKE_SECTION_KEYS = ["anxiety", "depression", "trauma", "relationship", "grief", "adhd", "sleep", "addiction", "stress", "other", "care", "prefs"];
 const normalizeIntakeSections = sections => (sections || []).map(s => String(s || "").trim().toLowerCase()).filter(s => INTAKE_SECTION_KEYS.includes(s));
 const intakeTokenFor = id => {
@@ -7632,17 +7723,38 @@ const PatientApp = ({
       onExit: () => setScreen(myEnquiry ? "status" : "landing"),
       onScreenChange: onScreenChange,
       onProgress: progress => {
-        if (myEnquiry) updateEnquiry(myEnquiry.id, {
+        if (!myEnquiry) return;
+        const nextPercent = Math.max(Number(myEnquiry.intakeProgress) || 0, progress.percent);
+        const sections = intakeRoute?.sections?.length ? intakeRoute.sections : detailedIntakeSectionsFor(myEnquiry);
+        updateEnquiry(myEnquiry.id, {
           intakeStartedAt: myEnquiry.intakeStartedAt || progress.startedAt,
-          intakeProgress: Math.max(Number(myEnquiry.intakeProgress) || 0, progress.percent)
+          intakeProgress: nextPercent
+        });
+        sendIntakeProgress({
+          enquiryId: myEnquiry.id,
+          status: "started",
+          percent: nextPercent,
+          startedAt: myEnquiry.intakeStartedAt || progress.startedAt,
+          sections
         });
       },
       onSubmit: b => {
+        const doctorName = ELEVIA_DATA.DOCTORS.find(d => d.id === b.doctor)?.name || b.doctor || "";
         if (myEnquiry) updateEnquiry(myEnquiry.id, {
           status: "appointment-requested",
           intakeDoneAt: new Date().toISOString(),
           intakeProgress: 100,
           doctor: b.doctor
+        });
+        if (myEnquiry) sendIntakeProgress({
+          enquiryId: myEnquiry.id,
+          status: "completed",
+          percent: 100,
+          startedAt: myEnquiry.intakeStartedAt || new Date().toISOString(),
+          completedAt: new Date().toISOString(),
+          sections: intakeRoute?.sections?.length ? intakeRoute.sections : detailedIntakeSectionsFor(myEnquiry),
+          doctor: doctorName,
+          slot: b.slot?.label || ""
         });
         setBooking(b);
         setScreen("booked");
