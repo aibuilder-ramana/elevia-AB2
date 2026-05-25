@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-25T01:42:00Z",
+  "updatedAt": "2026-05-25T01:45:30.389Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -8,17 +8,17 @@
       "status": "started",
       "percent": 42,
       "startedAt": "2026-05-20T10:15:00Z",
-      "updatedAt": "2026-05-25T01:42:00Z",
+      "updatedAt": "2026-05-25T01:45:30.389Z",
       "completedAt": null,
       "sections": [
-        "anxiety",
+        "depression",
         "care",
         "prefs"
       ],
       "doctor": "",
       "slot": "",
-      "sourceUrl": "",
-      "clientId": "codex-smoke-test"
+      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1043-xdqz52&sections=depression%2Ccare%2Cprefs",
+      "clientId": "990a9a20-db21-467c-a5b1-fc3476366931"
     }
   }
 }
