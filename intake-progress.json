@@ -1,0 +1,24 @@
+{
+  "project": "elevia-AB2",
+  "updatedAt": "2026-05-25T01:42:00Z",
+  "patients": {
+    "E-1043": {
+      "project": "elevia-AB2",
+      "enquiryId": "E-1043",
+      "status": "started",
+      "percent": 42,
+      "startedAt": "2026-05-20T10:15:00Z",
+      "updatedAt": "2026-05-25T01:42:00Z",
+      "completedAt": null,
+      "sections": [
+        "anxiety",
+        "care",
+        "prefs"
+      ],
+      "doctor": "",
+      "slot": "",
+      "sourceUrl": "",
+      "clientId": "codex-smoke-test"
+    }
+  }
+}
