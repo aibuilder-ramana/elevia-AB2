@@ -104,3 +104,17 @@ Feedback:
 > No written note.
 
 ---
+## 2026-05-27T18:42:30.472Z
+Project: elevia-AB2
+Screen: Patient enquiry - Insurance
+Screen ID: patient:enquiry-step-4
+Rating: Text feedback
+Client ID: 5a7ca12c-4255-4dfe-ac9e-675be6318ea8
+Client timestamp: 2026-05-27T18:42:30.172Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1420x627
+
+Feedback:
+> Instead of "No / Self-pay" maybe we have "No" and an option that says "Self pay or will accept self pay"
+
+---
