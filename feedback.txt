@@ -233,3 +233,62 @@ Feedback:
 > 	• Please do not include personal identifying information such as your birth date, or personal medical information in any emails you send to us.  No one can diagnose your condition from email or other written communications, and communication via our website cannot replace the relationship you have with a healthcare practitioner.
 
 ---
+## 2026-05-27T18:51:34.308Z
+Project: elevia-AB2
+Screen: Admin enquiries
+Screen ID: admin:dashboard
+Rating: Text feedback
+Client ID: 5a7ca12c-4255-4dfe-ac9e-675be6318ea8
+Client timestamp: 2026-05-27T18:51:34.001Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1420x627
+
+Feedback:
+> Hi Test,
+> 
+> Thanks for reaching out to our practice. I'm happy to help you get scheduled with one of our providers.
+> 
+> — Marisa
+> 
+> Alan Behrman & Associates, PC
+> Therapy That Works
+> 
+> 
+> 
+> Phone: 770-361-7864
+> Fax: 770-450-1725
+> 
+> 
+> ADMIN HOURS:
+> Monday - Friday 10:00 am EST - 4:00 pm EST
+> *Please note calls and emails received after 3:45pm may be returned the next business day. 
+> 
+> 
+> Office Locations:
+> 
+> 2862 Johnson Ferry Rd., Suite 150 & Suite 200
+> Marietta, GA 30062
+> 
+> 1041 Cambridge Square, Suite A
+> Alpharetta, GA 30009
+> 
+> 4855 River Green Pkwy, Suite 330
+> Duluth, GA 30096
+> 
+> 2150 Peachford Rd, Suite I
+> Atlanta, GA 30338 
+> *This location is ONLY for Dr. Ram on Tuesdays/Thursdays.
+> 
+> 2517 Jena St.
+> New Orleans, LA 70115
+> 
+> 
+> www.alanbehrman.com
+> 
+> Like us on Facebook: Facebook.com/AlanBehrmanAssociates
+> Follow us on Instagram, too: @behrmanandassociates
+> 
+> 	• Please keep in mind that communications via email over the internet are not secure.  Although it is unlikely, there is a possibility that information you include in an email can be intercepted and read by other parties besides the person to whom it is addressed.
+> 	• Please do not include personal identifying information such as your birth date, or personal medical information in any emails you send to us.  No one can diagnose your condition from email or other written communications, and communication via our website cannot replace the relationship you have with a healthcare practitioner.
+
+---
