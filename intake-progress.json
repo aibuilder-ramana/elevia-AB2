@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-28T12:26:22.526Z",
+  "updatedAt": "2026-05-28T12:26:58.845Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -63,7 +63,7 @@
       "status": "started",
       "percent": 60,
       "startedAt": "2026-05-28T10:19:06.401Z",
-      "updatedAt": "2026-05-28T12:26:22.526Z",
+      "updatedAt": "2026-05-28T12:26:58.845Z",
       "completedAt": null,
       "sections": [
         "grief",
