@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-28T10:18:29.899Z",
+  "updatedAt": "2026-05-28T10:18:42.106Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -38,6 +38,24 @@
       "slot": "Sun 24, 1:00 PM",
       "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1044-xdqz53&sections=trauma%2Ccare%2Cprefs",
       "clientId": "729dd031-1390-4505-8d03-5ae11a4ff880"
+    },
+    "E-1042": {
+      "project": "elevia-AB2",
+      "enquiryId": "E-1042",
+      "status": "started",
+      "percent": 1,
+      "startedAt": "2026-05-28T10:18:42.104Z",
+      "updatedAt": "2026-05-28T10:18:42.106Z",
+      "completedAt": null,
+      "sections": [
+        "anxiety",
+        "care",
+        "prefs"
+      ],
+      "doctor": "",
+      "slot": "",
+      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1042-xdqz51&sections=anxiety%2Ccare%2Cprefs",
+      "clientId": "f4b73a08-c62a-4d40-b10d-6da0df9275d7"
     }
   }
 }
