@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-28T05:52:56.584Z",
+  "updatedAt": "2026-05-28T05:52:59.611Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -27,15 +27,15 @@
       "status": "completed",
       "percent": 100,
       "startedAt": "2026-05-25T09:16:56.807Z",
-      "updatedAt": "2026-05-28T05:52:56.584Z",
+      "updatedAt": "2026-05-28T05:52:59.611Z",
       "completedAt": "2026-05-25T09:17:38.168Z",
       "sections": [
         "trauma",
         "care",
         "prefs"
       ],
-      "doctor": "Dr. James Holloway",
-      "slot": "Tue 26, 4:00 PM",
+      "doctor": "Dr. Renu Kapoor",
+      "slot": "Sun 24, 1:00 PM",
       "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1044-xdqz53&sections=trauma%2Ccare%2Cprefs",
       "clientId": "729dd031-1390-4505-8d03-5ae11a4ff880"
     }
