@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-28T21:17:28.070Z",
+  "updatedAt": "2026-05-28T21:17:39.239Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -8,16 +8,14 @@
       "status": "started",
       "percent": 84,
       "startedAt": "2026-05-20T10:15:00Z",
-      "updatedAt": "2026-05-28T21:17:28.070Z",
+      "updatedAt": "2026-05-28T21:17:39.239Z",
       "completedAt": null,
       "sections": [
-        "depression",
-        "care",
         "prefs"
       ],
       "doctor": "",
       "slot": "",
-      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1043-xdqz52&sections=depression%2Ccare%2Cprefs",
+      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1043-xdqz52&sections=prefs",
       "clientId": "026015ec-b5ff-48af-b969-276f25c789b1"
     },
     "E-1044": {
