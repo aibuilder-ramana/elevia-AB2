@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-28T11:37:18.736Z",
+  "updatedAt": "2026-05-28T11:37:26.249Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -97,9 +97,9 @@
       "project": "elevia-AB2",
       "enquiryId": "E-1048",
       "status": "started",
-      "percent": 12,
+      "percent": 18,
       "startedAt": "2026-05-28T11:33:39.904Z",
-      "updatedAt": "2026-05-28T11:37:18.736Z",
+      "updatedAt": "2026-05-28T11:37:26.249Z",
       "completedAt": null,
       "sections": [
         "depression",
