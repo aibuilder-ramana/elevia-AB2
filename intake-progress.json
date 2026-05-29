@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-05-29T05:49:10.420Z",
+  "updatedAt": "2026-05-29T06:01:40.587Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -27,16 +27,15 @@
       "status": "completed",
       "percent": 100,
       "startedAt": "2026-05-25T09:16:56.807Z",
-      "updatedAt": "2026-05-28T12:33:00.816Z",
+      "updatedAt": "2026-05-29T06:01:40.587Z",
       "completedAt": "2026-05-25T09:17:38.168Z",
       "sections": [
-        "trauma",
         "care",
         "prefs"
       ],
       "doctor": "Dr. Renu Kapoor",
       "slot": "Sun 24, 1:00 PM",
-      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1044-xdqz53&sections=trauma%2Ccare%2Cprefs",
+      "sourceUrl": "https://aibuilder-ramana.github.io/elevia-AB2/?intake=e-1044-xdqz53&sections=care%2Cprefs",
       "clientId": "16f6294c-c6ba-4149-af74-6d687b89d550"
     },
     "E-1042": {
