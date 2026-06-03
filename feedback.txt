@@ -460,3 +460,17 @@ Feedback:
 > No written note.
 
 ---
+## 2026-06-03T19:52:37.053Z
+Project: elevia-AB2
+Screen: Patient enquiry - Insurance
+Screen ID: patient:enquiry-step-4
+Rating: Text feedback
+Client ID: 5a7ca12c-4255-4dfe-ac9e-675be6318ea8
+Client timestamp: 2026-06-03T19:52:36.697Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1596x883
+
+Feedback:
+> Change not sure yet to "Will accept private pay"
+
+---
