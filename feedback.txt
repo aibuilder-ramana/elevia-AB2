@@ -530,3 +530,17 @@ Feedback:
 > If I can edit this myself at a later date, ignore. Otherwise, let's remove "Not sure yet" and "we'll ask more on a call".  Three options: 1. Psychiatry/medication mgmt 2. Therapy 3. Both
 
 ---
+## 2026-06-03T19:55:28.150Z
+Project: elevia-AB2
+Screen: Patient enquiry - Care needs
+Screen ID: patient:enquiry-step-5
+Rating: Thumbs up
+Client ID: 5a7ca12c-4255-4dfe-ac9e-675be6318ea8
+Client timestamp: 2026-06-03T19:55:27.838Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1596x883
+
+Feedback:
+> No written note.
+
+---
