@@ -516,3 +516,17 @@ Feedback:
 > Please remove sliding scale note. We do not typically offer that as most providers are on waitlist.
 
 ---
+## 2026-06-03T19:55:17.319Z
+Project: elevia-AB2
+Screen: Patient enquiry - Care needs
+Screen ID: patient:enquiry-step-5
+Rating: Text feedback
+Client ID: 5a7ca12c-4255-4dfe-ac9e-675be6318ea8
+Client timestamp: 2026-06-03T19:55:17.070Z
+URL: https://aibuilder-ramana.github.io/elevia-AB2/
+Viewport: 1596x883
+
+Feedback:
+> If I can edit this myself at a later date, ignore. Otherwise, let's remove "Not sure yet" and "we'll ask more on a call".  Three options: 1. Psychiatry/medication mgmt 2. Therapy 3. Both
+
+---
