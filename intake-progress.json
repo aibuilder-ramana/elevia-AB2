@@ -1,6 +1,6 @@
 {
   "project": "elevia-AB2",
-  "updatedAt": "2026-06-10T04:30:15.190Z",
+  "updatedAt": "2026-06-11T01:59:33.057Z",
   "patients": {
     "E-1043": {
       "project": "elevia-AB2",
@@ -27,7 +27,7 @@
       "status": "completed",
       "percent": 100,
       "startedAt": "2026-05-25T09:16:56.807Z",
-      "updatedAt": "2026-06-10T04:30:15.190Z",
+      "updatedAt": "2026-06-11T01:59:33.057Z",
       "completedAt": "2026-05-25T09:17:38.168Z",
       "sections": [
         "trauma",
